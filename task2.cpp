@@ -1,4 +1,5 @@
 #include <iostream>
+#include <exception>
 #include <ctime>
 
 enum Pond
@@ -8,37 +9,48 @@ enum Pond
     boot   
 };
 
-void initializationField(int field[], int const SIZE)
+void initializationField(int inField[], int const inSIZE)
+{    
+    for (int i = 0; i < inSIZE; ++i)
+    {
+        inField[i] = Pond::emptySector;
+    }
+
+    int randomValue;
+    for (int i = 0; i < 3; ++i)
+    {
+        randomValue = rand() % 9;
+        if (inField[randomValue] == Pond::emptySector)
+        {
+            inField[randomValue] = Pond::fish;
+        }
+        else {--i;}
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        randomValue = rand() % 9;
+        if (inField[randomValue] == Pond::emptySector)
+        {
+            inField[randomValue] = Pond::boot;
+        }
+        else {--i;}
+    }
+}
+
+void game(int inField[], int inSector)
 {
-    for (int i = 0; i < SIZE; ++i)
+    if (inField[inSector] == Pond::emptySector)
     {
-        field[i] = Pond::emptySector;
+        std::cout << "You have reached an empty sector, try again!" << std::endl;
     }
-
-    for (int i = 0; i < 3; ++i)
+    else if (inField[inSector] == Pond::boot)
     {
-        int randomValue = rand() % 9;
-        if (field[randomValue] == Pond::emptySector)
-        {
-            field[randomValue] = Pond::fish;
-        }
-        else
-        {
-            --i;
-        }
+        throw "You caught the boot! You lost!";
     }
-
-    for (int i = 0; i < 3; ++i)
+    else if (inField[inSector] == Pond::fish)
     {
-        int randomValue = rand() % 9;
-        if (field[randomValue] == Pond::emptySector)
-        {
-            field[randomValue] = Pond::boot;
-        }
-        else
-        {
-            --i;
-        }
+        throw "You caught a fish! You won!";
     }
 }
 
@@ -47,30 +59,25 @@ int main()
     std::srand(std::time(nullptr));
     int const SIZE = 10;
     int field[SIZE];
-    
-    initializationField(field, SIZE);
+    int sector;
+    initializationField(field, SIZE);   
 
+    bool is_game = true;
+    do {
+        std::cout << "Enter a sector number from 1 to 10: ";
+        std::cin >> sector;
+        --sector;       
 
-
-
-
-    for (int i = 0; i < SIZE; ++i)
-    {
-        if (field[i] == Pond::boot)
+        try 
         {
-            std::cout << "Boot" << std::endl;
+            game(field, sector);
         }
-        else if (field[i] == Pond::emptySector)
+        catch (const char* msg)
         {
-            std::cout << "Empty sector" << std::endl;
+            std::cout << msg << std::endl;
+            is_game = false;
         }
-        else if (field[i] == Pond::fish)
-        {
-            std::cout << "Fish" << std::endl;
-        }        
-    }
-
-   
+    } while (is_game);   
 
     return 0;
 }
