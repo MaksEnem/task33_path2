@@ -9,6 +9,24 @@ enum Pond
     boot   
 };
 
+class BootException : public std::exception
+{
+public:
+    const char* what() const noexcept override
+    {
+        return "You caught the boot! You lost!";
+    }
+};
+
+class FishException : public std::exception
+{
+public:
+    const char* what() const noexcept override
+    {
+        return "You caught a fish! You won!";
+    }
+};
+
 void initializationField(int inField[], int const inSIZE)
 {    
     for (int i = 0; i < inSIZE; ++i)
@@ -16,16 +34,9 @@ void initializationField(int inField[], int const inSIZE)
         inField[i] = Pond::emptySector;
     }
 
-    int randomValue;
-    for (int i = 0; i < 3; ++i)
-    {
-        randomValue = rand() % 9;
-        if (inField[randomValue] == Pond::emptySector)
-        {
-            inField[randomValue] = Pond::fish;
-        }
-        else {--i;}
-    }
+    int randomValue;    
+    randomValue = rand() % 9;
+    inField[randomValue] = Pond::fish;
 
     for (int i = 0; i < 3; ++i)
     {
@@ -35,7 +46,11 @@ void initializationField(int inField[], int const inSIZE)
             inField[randomValue] = Pond::boot;
         }
         else {--i;}
-    }
+    }        
+    /*for (int i = 0; i < inSIZE; ++i)
+    {
+        std::cout << i + 1 << " " <<  inField[i] << std::endl;
+    }*/
 }
 
 void game(int inField[], int inSector)
@@ -46,11 +61,11 @@ void game(int inField[], int inSector)
     }
     else if (inField[inSector] == Pond::boot)
     {
-        throw "You caught the boot! You lost!";
+        throw BootException();
     }
     else if (inField[inSector] == Pond::fish)
     {
-        throw "You caught a fish! You won!";
+        throw FishException();
     }
 }
 
@@ -71,11 +86,20 @@ int main()
         try 
         {
             game(field, sector);
-        }
-        catch (const char* msg)
+        }        
+        catch (const BootException& x)
         {
-            std::cout << msg << std::endl;
+            std::cerr << x.what() << std::endl;
             is_game = false;
+        }
+        catch (const FishException& x)
+        {
+            std::cerr << x.what() << std::endl;
+            is_game = false;
+        }
+        catch (...)
+        {
+            std::cerr << "Some kind of exception has happened ..." << std::endl;
         }
     } while (is_game);   
 
